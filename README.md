@@ -1,105 +1,147 @@
 # ISW / Ice-Sealed Wyvern
+
 <img src="https://github.com/YoyPa/isw/blob/master/image/isw.svg" alt="" width="25%" align="right">
 
-- isw started as an equivalent of "control tools by pherein" but under linux.
-- It is meant to alter fan profiles of MSI laptops.
-- Profiles for supported laptops are located in <a href="https://github.com/YoyPa/isw/blob/master/etc/isw.conf">/etc/isw.conf</a>.
-- You can check <a href="https://github.com/YoyPa/isw/blob/master/etc/isw.conf">/etc/isw.conf</a>. comments for more details.
+ISW is a fan control utility for MSI laptops running Linux. It provides both a **command-line interface** and a **native GTK3 graphical interface** to manage fan curves, temperatures, and hardware settings via the Embedded Controller (EC).
+
+> ISW is MSI at 180° — Ice-Sealed Wyvern in opposition to MSI's "unleash the dragon".
+
+Supported laptops are listed in [`/etc/isw.conf`](etc/isw.conf). The GUI will **auto-detect your laptop** on startup.
 
 ## Warning
-- Use it at your own risk!
+
+- Use at your own risk!
 - Secure boot can prevent access to the EC.
-- isw is made/tested with MSI GS40 6QE under Arch/Manjaro, other laptops depend on user contribution.
-- Check that your EC (Embedded Controler) work the same way, you can find documentation on the <a href="https://github.com/YoyPa/isw/wiki/MSI-G-laptop-EC---Rosetta">wiki</a>.
+- Check that your EC works the same way — see the [wiki](https://github.com/YoyPa/isw/wiki/MSI-G-laptop-EC---Rosetta) for documentation.
 
-## How to install
-### Package or not package ?
-- If you are using archlinux or a derivative you can install it from AUR: ```yay -S isw```
-- If you are on a different distro family:
-  - Clone ```git clone https://github.com/YoyPa/isw```
-  - Then look at this <a href="https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=isw">PKGBUILD</a> to know where to put files.
-  - /!\ Path can change a bit depending on the distro /!\
+## Features
 
-### Builtin or not builtin ?
-- It need ```ec_sys``` module with option ```write_support=1```, there are two scenario to set that:
-  - ec_sys is a builtin kernel module:
-    - add ```ec_sys.write_support=1``` in ```/etc/default/grub``` (Arch AUR package can't do it for you).
-    - then update your grub with ```update-grub``` and reboot.
-  - ec_sys is not a builtin kernel module:
-    - copy both ```isw-ec_sys.conf``` files provided (/etc/mod[...]) with same path (Arch AUR package will do it for you).
-    - then reboot OR ```modprobe ec_sys write_support=1```.
+### GUI (`isw-gui`)
 
-## How to use it ?
-### Current --help output
+- **Fan Curve Editor** — Interactive chart with draggable points for CPU and GPU fan curves
+- **Real-time Monitor** — Live temperature, fan speed, and RPM graphs with 2-minute rolling history
+- **Settings Panel** — Fan mode (Advanced/Basic/Auto), CoolerBoost toggle, battery charging threshold, USB backlight
+- **Auto-detection** — Automatically selects the correct profile for your laptop via DMI board identification
+
+### CLI (`isw`)
+
+| Option | Description |
+|--------|-------------|
+| `-b off\|on` | Enable or disable CoolerBoost |
+| `-c` | Show an EC dump |
+| `-f FILE` | Show profiles in a firmware update file |
+| `-p SECTION` | Show current profile in EC |
+| `-r [N]` | Real-time CPU/GPU temp and fan speed (N iterations, or infinite) |
+| `-s ADDR VAL` | Set a single EC byte (hex address, decimal value) |
+| `-t PERCENT` | Set battery charging threshold (20–100%) |
+| `-u off\|half\|full` | Set USB backlight level |
+| `-w SECTION` | Write a profile to EC |
+
+All options except `-h` and `-f` require root privileges.
+
+## Installation
+
+### Requirements
+
+- Python 3.8+
+- `PyGObject` (GTK3 bindings) — for the GUI
+- `ec_sys` kernel module with `write_support=1`
+
+### Setup
+
+Clone the repository:
+
 ```
-usage: isw [-h] [-b B] [-c] [-f FILE] [-p P] [-r [R]] [-s S S] [-t T] [-u USB] [-w W]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b B                  ┬ enable or disable CoolerBoost
-                        └ replace B with off OR on
-
-  -c                    ─ show an EC dump
-
-  -f FILE, --file FILE  ┬ show profile in EC update file
-                        └ replace FILE with FILE_NAME
-
-  -p P                  ┬ show current profile in EC
-                        └ replace P with SECTION_NAME
-
-  -r [R]                ┬ show realtime CPU+GPU temp and fan speed from EC
-                        ├ replace [R] with any [NUMBER] to perform a [NUMBER] of time(s)
-                        └ Assume [0] if given nothing = infinite loop
-
-  -s S S                ┬ set a single value into EC
-                        ├ replace 1st S with ADDRESS in hexadecimal (0x00)
-                        └ replace 2nd S with VALUE   in decimal     (00)
-
-  -t T                  ┬ set the battery charging treshold
-                        └ replace T with a NUMBER between 20 and 100 (٪)
-
-  -u USB, --usb USB     ┬ set usb backlight level
-                        └ replace USB with off, half OR full
-
-  -w W                  ┬ write into EC
-                        └ replace W with SECTION_NAME
-
-┌─ TIPS ──────────────────────────────────────────────────────────────────┐
-│ Set your config in '/etc/isw.conf'.                                     │
-│ Arguments order is relevant, -c and -p can be used twice. Example:      │
-│ isw -cw SECTION_NAME -c will show you EC dump before and after change.  │
-├─ SUPPORT ───────────────────────────────────────────────────────────────┤
-│ Help me support your laptop by providing following command output:      │
-│ isw -cp MSI_ADDRESS_DEFAULT                                             │
-│ via https://github.com/YoyPa/isw (open an issue).                       │
-│ Make sure your dump is made before altering EC with isw, you can reset  │
-│ your EC with a reboot or by changing power source.                      │
-├─ NAME ──────────────────────────────────────────────────────────────────┤
-│ ISW is MSI at 180°                                                      │
-│ It means Ice-Sealed Wyvern in opposition to MSI's 'unleash the dragon'  │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-<b>NB: all option exept -h and -f need priviledges.</b>
-
-### An example
-<b>SECTION_NAME</b> refer to the motherboard name inside ```isw.conf```, if <b>for example</b> you have a <b>GS40_6QE</b> your <b>SECTION_NAME</b> would be <b>14A1EMS1</b>.
-
-If you want to change temperature treshold and/or fan speed for cpu and/or gpu, you have to edit the corresponding section in ```isw.conf``` to set the wanted values and use ```isw -w 14A1EMS1``` to apply.
-
-If you want to check the current temperature and fan speed you will have to type ```isw -r```.
-
-Don't forget to read the comment at the beginning of ```isw.conf```, it contain some helpfull info.
-
-## Launch at startup/resume
-You can launch ```isw -w [SECTION_NAME]``` at startup/resume via systemd with isw@.service (need priviledges):
-```
-systemctl enable isw@[SECTION_NAME].service
+git clone https://github.com/mario0x/isw
+cd isw
 ```
 
-## TODO
+Or install as a Python package:
+
 ```
-- Daemonisation
-	- Launch at startup                            done
-	- launch after resume (hibernation/suspend)    done
-	- Launch at event(power source change)
+pip install .
 ```
+
+### EC module setup
+
+ISW needs the `ec_sys` kernel module loaded with write support:
+
+**If ec_sys is a builtin kernel module:**
+
+Add `ec_sys.write_support=1` to your kernel parameters in `/etc/default/grub`, then run `update-grub` and reboot.
+
+**If ec_sys is a loadable module:**
+
+Copy the provided config files:
+
+```
+sudo cp etc/modprobe.d/isw-ec_sys.conf /etc/modprobe.d/
+sudo cp etc/modules-load.d/isw-ec_sys.conf /etc/modules-load.d/
+```
+
+Then reboot, or load immediately with:
+
+```
+sudo modprobe ec_sys write_support=1
+```
+
+## Usage
+
+### GUI
+
+```
+sudo ./isw-gui
+```
+
+The GUI auto-detects your laptop model. You can also select a profile manually from the dropdown.
+
+### CLI
+
+Find your `SECTION_NAME` in [`isw.conf`](etc/isw.conf) — it's your motherboard ID (e.g. `14A1EMS1` for a GS40 6QE).
+
+```bash
+# Apply a fan profile
+sudo ./isw -w 14A1EMS1
+
+# Monitor temperatures in real-time
+sudo ./isw -r
+
+# Set battery charging threshold to 80%
+sudo ./isw -t 80
+
+# Toggle CoolerBoost
+sudo ./isw -b on
+```
+
+### Launch at startup/resume
+
+Use the systemd service to apply a profile at boot and after resume:
+
+```
+sudo systemctl enable isw@SECTION_NAME.service
+```
+
+## Project structure
+
+```
+isw
+├── src/isw/
+│   ├── cli.py           # Command-line interface
+│   ├── config.py         # Config parsing (dataclasses)
+│   ├── constants.py      # EC addresses, fan modes, magic numbers
+│   ├── ec.py             # Low-level EC read/write
+│   └── gui/
+│       ├── app.py        # Main GTK3 application window
+│       ├── controls.py   # Settings panel
+│       ├── fan_curve.py  # Interactive fan curve editor
+│       ├── monitor.py    # Real-time monitoring graphs
+│       └── profiles.py   # Profile selector
+├── etc/isw.conf          # Laptop profile database
+├── isw                   # CLI entry point
+├── isw-gui               # GUI entry point
+└── pyproject.toml        # Python package config
+```
+
+## Contributing
+
+Help support your laptop by opening an issue and providing `isw -cp MSI_ADDRESS_DEFAULT` output. Make sure your dump is taken before altering the EC — you can reset it with a reboot or by changing the power source.
