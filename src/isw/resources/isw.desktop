@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=ISW Fan Control
+Comment=MSI laptop fan curve control
+Exec=isw-gui
+Icon=isw
+Terminal=false
+Type=Application
+Categories=System;HardwareSettings;
+Keywords=fan;temperature;msi;cooling;

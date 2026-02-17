@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "isw"
+version = "3.0.0"
+description = "ISW (Ice-Sealed Wyvern) - MSI laptop fan control utility with GUI"
+readme = "README.md"
+license = {text = "GPL-3.0"}
+requires-python = ">=3.8"
+dependencies = [
+    "PyGObject>=3.42.0",
+]
+
+[project.scripts]
+isw = "isw.cli:main"
+isw-gui = "isw.gui.app:run_gui"
+
+[tool.setuptools.packages.find]
+where = ["src"]

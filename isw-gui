@@ -1,8 +1,5 @@
 #!/usr/bin/python3
-"""ISW - Ice-Sealed Wyvern: MSI laptop fan control utility.
-
-This is the backward-compatible CLI entry point.
-"""
+"""ISW GUI - Graphical interface for MSI laptop fan control."""
 
 import sys
 import os
@@ -10,7 +7,7 @@ import os
 # Add src directory to path so the package can be found
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 
-from isw.cli import main
+from isw.gui.app import run_gui
 
 if __name__ == '__main__':
-    main()
+    run_gui()
